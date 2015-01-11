@@ -2,3 +2,9 @@ zirc is a daemon that connects to an IRC server, joins a channel, and listens fo
 
     pip install -r requirements.txt
     python3 zirc.py --nick zirc --server irc.freenode.net --channel #botwars
+
+
+Sending Messages
+================
+
+    echo "Hello, World!" | python3 send.py

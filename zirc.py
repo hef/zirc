@@ -1,9 +1,9 @@
-import irc.bot
-import logging
-import zmq
-from irc.client import Connection, Event, Reactor
 import argparse
+import logging
 import time
+import irc.bot
+from irc.client import Connection, Event, Reactor
+import zmq
 
 log = logging.getLogger(__name__)
 
@@ -83,7 +83,8 @@ class ZircBot(irc.bot.SingleServerIRCBot):
         self.reactor.zmq_pull()
 
     def on_zmq_recv(self, c, e):
-        message = e.arguments.split('\r\n')[0][:80]
+        message = e.arguments.splitlines()[0][:250]
+        print(message)
         self.connection.privmsg(self.channel, message)
 
 if __name__ == '__main__':

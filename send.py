@@ -1,13 +1,16 @@
 #!/usr/bin/env python
-import zmq
 import argparse
+import zmq
+import fileinput
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--server', default='127.0.0.1')
-parser.add_argument('message')
 args = parser.parse_args()
 
 context = zmq.Context()
 socket = context.socket(zmq.PUSH)
 socket.connect('tcp://{}:5558'.format(args.server))
-socket.send_string(args.message)
+
+with fileinput.input(files=('-')) as f:
+    for line in f:
+        socket.send_string(line)
