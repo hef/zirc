@@ -2,10 +2,11 @@ import irc.bot
 import logging
 import zmq
 from irc.client import Connection, Event, Reactor
-import socket
 import argparse
+import time
 
 log = logging.getLogger(__name__)
+
 
 class ZMQReactor(Reactor):
 
@@ -23,9 +24,9 @@ class ZMQReactor(Reactor):
         if sockets:
 
             # build a list of socket fd's to real sockets
-            socket_index = dict(map(lambda s: (s.fileno(), s), filter(lambda s: hasattr(s, 'fileno'), sockets)))
+            socket_objects = filter(lambda s: hasattr(s, 'fileno'), sockets)
+            socket_index = dict(map(lambda s: (s.fileno(), s), socket_objects))
             # zmq.select is going to return zmq sockets and socket fds
-            timeout=10
             (i, o, e) = zmq.select(sockets, [], [], timeout)
 
             # rebuild fd's into socket objects, and also keep zmq sockets
@@ -39,6 +40,7 @@ class ZMQReactor(Reactor):
         else:
             time.sleep(timeout)
         self.process_timeout()
+
 
 class ZMQConnection(Connection):
 
@@ -58,11 +60,17 @@ class ZMQConnection(Connection):
     def _handle_event(self, event):
         self.reactor._handle_event(self, event)
 
+
 class ZircBot(irc.bot.SingleServerIRCBot):
 
     def __init__(self, nickname, server, port, channel):
         self.reactor_class = ZMQReactor
-        irc.bot.SingleServerIRCBot.__init__(self, [(server, port)], nickname, nickname)
+        irc.bot.SingleServerIRCBot.__init__(
+            self,
+            [(server, port)],
+            nickname,
+            nickname
+        )
         self.channel = channel
 
     def on_nicknameinuse(self, c, e):
@@ -86,9 +94,12 @@ if __name__ == '__main__':
     parser.add_argument('--channel', required=True)
     args = parser.parse_args()
 
-    bot = ZircBot(nickname=args.nick, server=args.server, port=args.port, channel=args.channel)
+    bot = ZircBot(
+        nickname=args.nick,
+        server=args.server,
+        port=args.port,
+        channel=args.channel
+    )
     bot.connection.set_rate_limit(1)
     bot.zmq_pull()
     bot.start()
-        
-
