@@ -11,6 +11,7 @@ class ZMQHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         postvars = {}
+        content = {}
         ctype, pdict = cgi.parse_header(self.headers['content-type'])
         if ctype == 'multipart/form-data':
             postvars = cgi.parse_multipart(self.rfile, pdict)
@@ -25,6 +26,14 @@ class ZMQHandler(BaseHTTPRequestHandler):
         message['path'] = self.path
         message['request_version'] = self.request_version
         message['form'] = postvars
+        
+        headers = {}
+        for k,v in self.headers.items():
+            headers[k] = cgi.parse_header(v)
+
+        message['headers'] = str(self.headers)
+        message['headers'] = headers
+        message['content'] = content
         data = json.dumps(message)
         self.server.zmq_socket.send_multipart([ self.path.encode('utf-8') ,data.encode('utf-8')])
         self.send_response(200)
