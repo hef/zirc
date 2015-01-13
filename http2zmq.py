@@ -34,7 +34,7 @@ if __name__ == '__main__':
     server = HTTPServer(('',8000), ZMQHandler)
     context = zmq.Context.instance()
     socket = context.socket(zmq.PUB)
-    socket.bind('tcp://*:5556')
+    socket.bind('tcp://*:5506')
     server.zmq_socket = socket
     server.serve_forever()
 
