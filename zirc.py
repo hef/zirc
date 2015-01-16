@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import argparse
 import logging
 import time
@@ -6,7 +7,6 @@ from irc.client import Connection, Event, Reactor
 import zmq
 
 log = logging.getLogger(__name__)
-
 
 class ZMQReactor(Reactor):
 
@@ -93,7 +93,10 @@ if __name__ == '__main__':
     parser.add_argument('--server', required=True)
     parser.add_argument('--port', type=int, default=6667)
     parser.add_argument('--channel', required=True)
+    parser.add_argument('--log', dest='level', action='store')
     args = parser.parse_args()
+
+    logging.basicConfig(level=args.level)
 
     bot = ZircBot(
         nickname=args.nick,
