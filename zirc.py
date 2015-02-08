@@ -83,9 +83,10 @@ class ZircBot(irc.bot.SingleServerIRCBot):
         self.reactor.zmq_pull()
 
     def on_zmq_recv(self, c, e):
-        message = e.arguments.splitlines()[0][:250]
-        print(message)
-        self.connection.privmsg(self.channel, message)
+        if len(e.arguments.splitlines()) > 0:
+            message = e.arguments.splitlines()[0][:250]
+            log.info(message)
+            self.connection.privmsg(self.channel, message)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
