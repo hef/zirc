@@ -5,6 +5,7 @@ import time
 import irc.bot
 from irc.client import Connection, Event, Reactor
 import zmq
+from pprint import pprint
 
 log = logging.getLogger(__name__)
 
@@ -84,8 +85,12 @@ class ZircBot(irc.bot.SingleServerIRCBot):
         c.join(self.channel)
 
     def on_pubmsg(self, c, e):
-        if len(e.arguments) > 0:
-            self.socket.send_string(e.arguments[0])
+        msg = {}
+        msg['type'] = e.type
+        msg['source'] = e.source
+        msg['target'] = e.target
+        msg['arguments'] = e.arguments
+        self.socket.send_json(msg)
 
 
     def zmq_pull(self):
