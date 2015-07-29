@@ -73,11 +73,20 @@ class ZircBot(irc.bot.SingleServerIRCBot):
         )
         self.channel = channel
 
+        context = zmq.Context()
+        self.socket = context.socket(zmq.PUB)
+        self.socket.bind('tcp://*:5559')
+
     def on_nicknameinuse(self, c, e):
         c.nick(self.get_nickname() + '_')
 
     def on_welcome(self, c, e):
         c.join(self.channel)
+
+    def on_pubmsg(self, c, e):
+        if len(e.arguments) > 0:
+            self.socket.send_string(e.arguments[0])
+
 
     def zmq_pull(self):
         self.reactor.zmq_pull()
